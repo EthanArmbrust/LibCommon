@@ -4,6 +4,7 @@
 #include "CTransform4f.h"
 #include <iomanip>
 #include <float.h>
+#include <math.h>
 
 CVector3f::CVector3f()
 {

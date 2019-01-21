@@ -9,6 +9,8 @@
 #include "Common/EGame.h"
 #include "Common/TString.h"
 
+#include "codegen/EnumReflection.h"
+
 #include <type_traits>
 
 #include <list>
@@ -16,6 +18,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 /* This is a custom serialization implementation intended for saving game assets out to editor-
  * friendly formats, such as XML. The main goals of the serialization system is to simplify the
@@ -296,16 +299,18 @@ struct ArchiveConstructorType
 };
 
 /** Helper that turns functions on or off depending on their serialize type */
-#define IS_SERIAL_TYPE(SType) (SerialType<ValType, IArchive>::Type == SerialType<ValType, IArchive>::##SType)
+#define IS_SERIAL_TYPE(SType) (SerialType<ValType, IArchive>::Type == SerialType<ValType, IArchive>::SType)
 
 /** Helper that turns functions on or off depending on their StaticConstructor type */
-#define IS_ARCHIVE_CONSTRUCTOR_TYPE(CType) (ArchiveConstructorType<ValType, IArchive>::Type == ArchiveConstructorType<ValType, IArchive>::##CType)
+#define IS_ARCHIVE_CONSTRUCTOR_TYPE(CType) (ArchiveConstructorType<ValType, IArchive>::Type == ArchiveConstructorType<ValType, IArchive>::CType)
+
+/** Helper that fetches the type used to represent an abstract object type */
+#define ABSTRACT_TYPE typename ArchiveConstructorType<ValType, IArchive>::ObjType
 
 /** Helper that turns functions on or off depending on if the parameter type is abstract */
 #define IS_ABSTRACT ( std::is_abstract_v<ValType> || (std::is_polymorphic_v<ValType> && ArchiveConstructorType<ValType, IArchive>::Type != ArchiveConstructorType<ValType, IArchive>::None) )
 
-/** Helper that fetches the type used to represent an abstract object type */
-#define ABSTRACT_TYPE ArchiveConstructorType<ValType, IArchive>::ObjType
+
 
 /** IArchive - Main serializer archive interface */
 class IArchive
@@ -435,7 +440,7 @@ private:
     {
         // If you fail here, you are missing an ArchiveConstructor() function, or you do have one but it is malformed.
         // Check the comments at the top of this source file for details on serialization requirements for abstract objects.
-        static_assert(false, "Abstract objects being serialized must have virtual Type() and static ArchiveConstructor() functions.");
+        static_assert(IS_ARCHIVE_CONSTRUCTOR_TYPE(None), "Abstract objects being serialized must have virtual Type() and static ArchiveConstructor() functions.");
     }
 
     // Parameter stack handling
@@ -697,7 +702,7 @@ public:
     ENABLE_IF( IS_SERIAL_TYPE(Global) && IS_ABSTRACT, IArchive& )
     operator<<(TSerialParameter<ValType*>)
     {
-        static_assert(false, "Global Serialize method for polymorphic type pointers is not supported.");
+        static_assert(IS_SERIAL_TYPE(Global) && IS_ABSTRACT, "Global Serialize method for polymorphic type pointers is not supported.");
     }
 
     // Generate compiler errors for classes with no valid Serialize function defined
@@ -705,7 +710,7 @@ public:
     ENABLE_IF( IS_SERIAL_TYPE(None), IArchive& )
     operator<<(TSerialParameter<ValType>)
     {
-        static_assert(false, "Object being serialized has no valid Serialize method defined.");
+        static_assert( IS_SERIAL_TYPE(None), "Object being serialized has no valid Serialize method defined.");
     }
 
     // Interface

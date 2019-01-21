@@ -2,6 +2,7 @@
 #include "Macros.h"
 #include "Common/FileIO/CFileInStream.h"
 
+#include <iostream>
 #include <experimental/filesystem>
 #include <system_error>
 
@@ -219,8 +220,11 @@ TString WorkingDirectory()
 
 TString MakeAbsolute(TString Path)
 {
-    if (!ToPath(*Path).has_root_name())
-        Path = WorkingDirectory() + "/" + Path;
+    auto fucker = Path.CString()[0];
+    if (!ToPath(*Path).has_root_name() && Path.CString()[0] != '/'){
+            std::cout << "First letter is " << fucker << std::endl;
+            Path = WorkingDirectory() + "/" + Path;
+    }
 
     TStringList Components = Path.Split("/\\");
     TStringList::iterator Prev;
@@ -235,7 +239,7 @@ TString MakeAbsolute(TString Path)
         Prev = Iter;
     }
 
-    TString Out;
+    TString Out = "/";
     for (auto it = Components.begin(); it != Components.end(); it++)
         Out += *it + "/";
 

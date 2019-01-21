@@ -37,8 +37,11 @@ void CFileOutStream::Open(const TString& rkFile, EEndian FileEndianness)
 {
     if (IsValid())
         Close();
-
+#if WIN32
     _wfopen_s(&mpFStream, ToWChar(rkFile), L"wb");
+#else
+    mpFStream = fopen(*rkFile, "wb");
+#endif
     mName = rkFile;
     mDataEndianness = FileEndianness;
     mSize = 0;
@@ -48,8 +51,11 @@ void CFileOutStream::Update(const TString& rkFile, EEndian FileEndianness)
 {
     if (IsValid())
         Close();
-
+#if WIN32
     _wfopen_s(&mpFStream, ToWChar(rkFile), L"rb+");
+#else
+    mpFStream = fopen(*rkFile, "rb+");
+#endif
     mName = rkFile;
     mDataEndianness = FileEndianness;
     Seek(0x0, SEEK_END);
@@ -81,7 +87,11 @@ bool CFileOutStream::Seek(int32 Offset, uint32 Origin)
 bool CFileOutStream::Seek64(int64 Offset, uint32 Origin)
 {
     if (!IsValid()) return false;
+#if WIN32
     return (_fseeki64(mpFStream, Offset, Origin) != 0);
+#else
+    return (fseeko(mpFStream, Offset, Origin) != 0);
+#endif
 }
 
 uint32 CFileOutStream::Tell() const
@@ -93,7 +103,11 @@ uint32 CFileOutStream::Tell() const
 uint64 CFileOutStream::Tell64() const
 {
     if (!IsValid()) return 0;
+#if WIN32
     return _ftelli64(mpFStream);
+#else
+    return ftello(mpFStream);
+#endif
 }
 
 bool CFileOutStream::EoF() const

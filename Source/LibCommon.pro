@@ -26,7 +26,7 @@ win32: {
 
 unix {
     target.path = /usr/lib
-    QMAKE_CXXFLAGS += /WX
+    QMAKE_CXXFLAGS += --std=c++17
     INSTALLS += target
 }
 

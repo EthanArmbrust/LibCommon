@@ -22,7 +22,14 @@ public:
     void Lock(const TString& rkPath)
     {
         Release();
-        mpFile = _wfopen(ToWChar(rkPath), L"a+");
+
+#if WIN32
+    mpFile = _wfopen(ToWChar(rkPath), L"a+");
+#else
+    mpFile = fopen(*rkPath, "a+");
+#endif
+
+
     }
 
     void Release()

@@ -1,4 +1,5 @@
 #include "CColor.h"
+#include <math.h>
 
 CColor::CColor()
     : R(0.f), G(0.f), B(0.f), A(0.f)

@@ -1,5 +1,7 @@
 #include "MathUtil.h"
 #include "CMatrix4f.h"
+#include <math.h>
+#include <float.h>
 
 namespace Math
 {

@@ -1,5 +1,6 @@
 #include "CFrustumPlanes.h"
 #include "MathUtil.h"
+#include <math.h>
 #include "Common/BasicTypes.h"
 
 CFrustumPlanes::CFrustumPlanes()

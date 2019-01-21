@@ -20,7 +20,7 @@ TStringList gPreInitLogs;
 
 bool InitLog(const TString& rkFilename)
 {
-    fopen_s(&gpLogFile, *rkFilename, "w");
+    gpLogFile = fopen(*rkFilename, "w");
     gLogFilename = rkFilename;
 
     if (!gpLogFile)
@@ -33,7 +33,7 @@ bool InitLog(const TString& rkFilename)
         {
             if (Num > 999) break;
             TString NewFilename = FileName + "_" + TString::FromInt32(Num, 0, 10) + "." + Extension;
-            fopen_s(&gpLogFile, *NewFilename, "w");
+            gpLogFile = fopen(*NewFilename, "w");
             Num++;
         }
 
@@ -46,7 +46,7 @@ bool InitLog(const TString& rkFilename)
     time(&RawTime);
 
     tm pTimeInfo;
-    localtime_s(&pTimeInfo, &RawTime);
+    localtime(&RawTime);
 
     char Buffer[80];
     strftime(Buffer, 80, "%m/%d/%y %H:%M:%S", &pTimeInfo);
@@ -72,7 +72,7 @@ bool InitLog(const TString& rkFilename)
     return true;
 }
 
-void WriteInternal(EMsgType Type, const char* pkMsg, const va_list& VarArgs)
+void WriteInternal(EMsgType Type, const char* pkMsg, va_list& VarArgs)
 {
     char LineBuffer[512];
     double Time = CTimer::GlobalTime() - gAppStartTime;
